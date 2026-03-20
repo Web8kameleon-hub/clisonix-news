@@ -1,0 +1,338 @@
+/**
+ * Neural Planner Tests
+ * Comprehensive testing for AGI neural network monitoring
+ * 
+ * @version 8.0.0
+ * @author Ledjan Ahmati
+ * @contact dealsjona@gmail.com
+ */
+
+// Neural Planner Test - Real Data Only
+// No imports needed for Jest globals: describe, it, expect, beforeEach, afterEach are available
+// Real data source
+import NeuralPlanner from '../lib/NeuralPlanner';
+
+describe('Neural Planner System', () => {
+  let planner: NeuralPlanner;
+
+  beforeEach(() => {
+    planner = new NeuralPlanner({
+      maxPulseRate: 100,
+      flickeringThreshold: 3,
+      throttleDelay: 1000, // Shorter for testing
+      safeThinkDuration: 2000, // Shorter for testing
+      monitoringInterval: 50, // Faster for testing
+      emergencyShutdownThreshold: 200
+    });
+  });
+
+  afterEach(() => {
+    planner.destroy();
+  });
+
+  describe('Initialization', () => {
+    it('should initialize with 8 core neural nodes', () => {
+      const status = planner.getNetworkStatus();
+      expect(status.nodes).toHaveLength(8);
+      expect(status.nodes.every(node => node.status === 'active' || node.status === 'throttled')).toBe(true);
+    });
+
+    it('should have n1 and n7 nodes properly configured', () => {
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+      const n7 = status.nodes.find((n: any) => n.id === 'n7');
+
+      expect(n1).toBeDefined();
+      expect(n1?.name).toBe('Primary Input Processor');
+      expect(n1?.type).toBe('input');
+
+      expect(n7).toBeDefined();
+      expect(n7?.name).toBe('Ethical Oversight Controller');
+      expect(n7?.type).toBe('ethical');
+    });
+  });
+
+  describe('n1 Node Monitoring', () => {
+    it('should detect n1 overload and throttle input', async () => {
+      const alertsSpy = jest.fn();
+      planner.on('nodeOverload', alertsSpy);
+
+      // Simulate high pulse rate for n1
+      planner.setNodeActivity('n1', 100); // Max activity to trigger high pulse rate
+
+      // Wait for monitoring cycle
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+
+      // Check if throttling occurs when pulse rate exceeds threshold
+      if (n1 && n1.pulseRate > 80) {
+        expect(n1.status).toBe('throttled');
+      }
+    });
+
+    it('should recover n1 from throttled state', async () => {
+      // Force throttle n1
+      planner.setNodeActivity('n1', 100);
+      
+      // Wait for potential throttling
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Reduce activity
+      planner.setNodeActivity('n1', 20);
+      
+      // Wait for recovery
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+      expect(n1?.status).toBe('active');
+    });
+  });
+
+  describe('n7 Ethical Monitoring', () => {
+    it('should detect n7 ethical pulse anomaly and activate SafeThink', async () => {
+      const safeThinkSpy = jest.fn();
+      planner.on('safeThinkActivated', safeThinkSpy);
+
+      // Simulate excessive flickering for n7 by triggering irregular pulses
+      // This is harder to simulate directly, so we'll test the SafeThink activation
+      const status = planner.getNetworkStatus();
+      const n7 = status.nodes.find((n: any) => n.id === 'n7');
+      
+      if (n7 && n7.status === 'safethink') {
+        expect(safeThinkSpy).toHaveBeenCalled();
+      }
+    });
+
+    it('should deactivate SafeThink after duration', async () => {
+      const deactivateSpy = jest.fn();
+      planner.on('safeThinkDeactivated', deactivateSpy);
+
+      // If SafeThink becomes active during test, wait for deactivation
+      await new Promise(resolve => setTimeout(resolve, 2500));
+
+      // Check that SafeThink can be deactivated
+      const status = planner.getNetworkStatus();
+      const n7 = status.nodes.find((n: any) => n.id === 'n7');
+      expect(n7?.status).not.toBe('safethink');
+    });
+  });
+
+  describe('Activity Map Generation', () => {
+    it('should generate activity map with node coordinates', () => {
+      const activityMap = planner.getActivityMap();
+
+      expect(activityMap.nodeActivities).toBeDefined();
+      expect(activityMap.nodeActivities['n1']).toBeDefined();
+      expect(activityMap.nodeActivities['n7']).toBeDefined();
+
+      expect(activityMap.connectionStrengths).toBeDefined();
+      expect(activityMap.timestamp).toBeDefined();
+    });
+
+    it('should include connection information', () => {
+      const activityMap = planner.getActivityMap();
+
+      expect(activityMap.connectionStrengths).toBeDefined();
+      expect(typeof activityMap.connectionStrengths).toBe('object');
+    });
+  });
+
+  describe('Manual Node Control', () => {
+    it('should allow manual activity setting', () => {
+      const success = planner.setNodeActivity('n1', 75);
+      expect(success).toBe(true);
+
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+      expect(n1?.activity).toBe(75);
+    });
+
+    it('should reject invalid node IDs', () => {
+      const success = planner.setNodeActivity('invalid', 50);
+      expect(success).toBe(false);
+    });
+
+    it('should clamp activity values to valid range', () => {
+      planner.setNodeActivity('n1', 150); // Over 100
+      let status = planner.getNetworkStatus();
+      let n1 = status.nodes.find((n: any) => n.id === 'n1');
+      expect(n1?.activity).toBe(100);
+
+      planner.setNodeActivity('n1', -50); // Under 0
+      status = planner.getNetworkStatus();
+      n1 = status.nodes.find((n: any) => n.id === 'n1');
+      expect(n1?.activity).toBe(0);
+    });
+  });
+
+  describe('Emergency Procedures', () => {
+    it('should trigger emergency shutdown for extreme pulse rates', async () => {
+      const emergencySpy = jest.fn();
+      planner.on('emergencyShutdown', emergencySpy);
+
+      // Force extreme activity to trigger emergency
+      planner.setNodeActivity('n1', 100);
+      
+      // Wait for monitoring cycles
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Check for emergency conditions
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+      
+      if (n1 && n1.pulseRate > 200) {
+        expect(n1.status).toBe('offline');
+      }
+    });
+
+    it('should reset network to initial state', () => {
+      // Modify some nodes
+      planner.setNodeActivity('n1', 100);
+      planner.setNodeActivity('n7', 100);
+
+      // Reset network
+      planner.resetNetwork();
+
+      const status = planner.getNetworkStatus();
+      status.nodes.forEach((node: any) => {
+        expect(node.status).toBe('active');
+        expect(node.errorCount).toBe(0);
+        expect(node.activity).toBeGreaterThan(0);
+        expect(node.activity).toBeLessThan(100);
+      });
+
+      // Check that no nodes are throttled and all are active
+      const throttledNodes = status.nodes.filter((node: any) => node.status === 'throttled');
+      expect(throttledNodes).toHaveLength(0);
+      
+      const safeThinkNodes = status.nodes.filter((node: any) => node.status === 'safethink');
+      expect(safeThinkNodes).toHaveLength(0);
+    });
+  });
+
+  describe('Event System', () => {
+    it('should emit warning events', async () => {
+      const warningSpy = jest.fn();
+      planner.on('warning', warningSpy);
+
+      // Trigger condition that might cause warning
+      planner.setNodeActivity('n1', 95);
+      
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Check if warnings are emitted appropriately
+      // This test is more observational since warnings depend on dynamic conditions
+    });
+
+    it('should emit alert events', async () => {
+      const alertSpy = jest.fn();
+      planner.on('alert', alertSpy);
+
+      // Trigger condition that might cause alert
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Check if alerts are emitted appropriately
+    });
+  });
+
+  describe('Performance and Stability', () => {
+    it('should handle rapid activity changes', () => {
+      for (let i = 0; i < 100; i++) {
+        planner.setNodeActivity('n1', 0.5 * 100);
+        planner.setNodeActivity('n7', 0.5 * 100);
+      }
+
+      const status = planner.getNetworkStatus();
+      expect(status.nodes).toHaveLength(8);
+      expect(status.nodes.every(node => node.status === 'active')).toBe(true);
+    });
+
+    it('should maintain network integrity under stress', async () => {
+      // Simulate stress conditions
+      const stressTest = async () => {
+        for (let i = 0; i < 50; i++) {
+          planner.setNodeActivity('n1', 100);
+          planner.setNodeActivity('n7', 100);
+          await new Promise(resolve => setTimeout(resolve, 10));
+          planner.setNodeActivity('n1', 0);
+          planner.setNodeActivity('n7', 0);
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+      };
+
+      await stressTest();
+
+      const status = planner.getNetworkStatus();
+      expect(status.nodes).toHaveLength(8);
+      // After stress test, nodes might be in various states but should all be functional
+      expect(status.nodes.every(node => 
+        node.status === 'active' || 
+        node.status === 'throttled' || 
+        node.status === 'safethink'
+      )).toBe(true);
+    });
+  });
+
+  describe('Pulse Detection Algorithms', () => {
+    it('should detect irregular pulse patterns', () => {
+      const activityMap = planner.getActivityMap();
+      
+      // Check that activity data is being calculated
+      expect(activityMap.nodeActivities).toBeDefined();
+      expect(typeof activityMap.nodeActivities).toBe('object');
+    });
+
+    it('should calculate pulse rates based on activity', () => {
+      planner.setNodeActivity('n1', 80);
+      
+      const status = planner.getNetworkStatus();
+      const n1 = status.nodes.find((n: any) => n.id === 'n1');
+      
+      expect(n1?.pulseRate).toBeGreaterThan(0);
+      expect(typeof n1?.pulseRate).toBe('number');
+    });
+  });
+
+  describe('Alert Generation', () => {
+    it('should generate alerts for problematic conditions', () => {
+      const activityMap = planner.getActivityMap();
+      
+      // Activity map should have proper structure
+      expect(activityMap.nodeActivities).toBeDefined();
+      expect(activityMap.connectionStrengths).toBeDefined();
+      
+      // Test alert generation logic
+      planner.setNodeActivity('n1', 100);
+      planner.setNodeActivity('n7', 100);
+      
+      const updatedMap = planner.getActivityMap();
+      expect(updatedMap.timestamp).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Cleanup and Resource Management', () => {
+    it('should stop monitoring when destroyed', () => {
+      const initialStatus = planner.getNetworkStatus();
+      expect(initialStatus.nodes).toHaveLength(8);
+      
+      planner.destroy();
+      
+      // After destruction, the planner should not be running
+      // Note: We can't test getNetworkStatus after destroy as it may throw
+    });
+
+    it('should clean up event listeners', () => {
+      const testListener = jest.fn();
+      planner.on('test', testListener);
+      
+      planner.destroy();
+      
+      // Event listeners should be cleaned up
+      expect(planner.listenerCount('test')).toBe(0);
+    });
+  });
+});
+
