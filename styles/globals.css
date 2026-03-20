@@ -1,0 +1,43 @@
+/**
+ * EuroWeb Web8 - Global Styles
+ * CSS Modules + CVA + Theme Variables System + Tailwind v4
+ * 
+ * @author Ledjan Ahmati (100% Owner)
+ * @version 8.0.1 Industrial
+ */
+
+/* Tailwind CSS v4 */
+@import "tailwindcss";
+
+/* Import Theme Variables */
+@import './theme-vars.css';
+
+/* Reset and Base Styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Focus States */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
