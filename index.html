@@ -105,6 +105,8 @@ const CATEGORY_ICONS = {
 const allArticles = [];
 const PAGE_SIZE = 15;
 const state = { page: 1, query: "", category: "all" };
+const AUTO_REFRESH_MS = 60000;
+let autoRefreshTimer = null;
 const AUDIT_ENDPOINTS = [
   "https://newsroom.clisonix.com/audit?limit=200",
   "https://api.clisonix.com/newsroom/audit?limit=200",
@@ -160,6 +162,13 @@ async function loadArticles() {
   }
 
   render();
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) return;
+  autoRefreshTimer = setInterval(() => {
+    loadArticles();
+  }, AUTO_REFRESH_MS);
 }
 
 function initializeFilters() {
@@ -225,7 +234,9 @@ function render() {
   const start = (state.page - 1) * PAGE_SIZE;
   const slice = items.slice(start, start + PAGE_SIZE);
 
-  document.getElementById("statsLine").textContent = total + " article" + (total !== 1 ? "s" : "");
+  if (total > 0) {
+    document.getElementById("statsLine").textContent = total + " article" + (total !== 1 ? "s" : "");
+  }
   
   const list = document.getElementById("articleList");
   list.innerHTML = "";
@@ -292,6 +303,7 @@ function render() {
 // Initialize
 initializeFilters();
 loadArticles();
+startAutoRefresh();
 </script>
 
 </body>
