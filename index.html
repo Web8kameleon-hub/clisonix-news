@@ -17,6 +17,9 @@
     header p { color: #94a3b8; font-size: 1rem; margin-bottom: 1rem; }
     .tagline { color: #64748b; font-size: 0.85rem; }
     .search-bar { max-width: 600px; margin: 1.5rem auto 0; display: flex; gap: 0.5rem; }
+    .top-nav { display: flex; justify-content: center; gap: 0.75rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .top-nav a { color: #93c5fd; text-decoration: none; border: 1px solid #334155; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.78rem; }
+    .top-nav a:hover { border-color: #3b82f6; color: #dbeafe; }
     .search-bar input { flex: 1; padding: 0.8rem 1.2rem; border: 1px solid #334155; border-radius: 8px; background: #1e293b; color: #e2e8f0; font-size: 0.95rem; }
     .search-bar input::placeholder { color: #64748b; }
     main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
@@ -58,6 +61,11 @@
   <h1>Clisonix News</h1>
   <p class="tagline">Global AI-Powered News Platform</p>
   <p>Independent, verified, ethical journalism. Technology • Economy • Health • Innovation • Society</p>
+  <div class="top-nav">
+    <a href="https://news.clisonix.com/">News Home</a>
+    <a href="https://ledjanahmati.github.io/clisonix-blog/">Main Blog</a>
+    <a href="https://clisonix.com">Clisonix.com</a>
+  </div>
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="Search news..." oninput="onSearch()">
   </div>
@@ -97,6 +105,62 @@ const CATEGORY_ICONS = {
 const allArticles = [];
 const PAGE_SIZE = 15;
 const state = { page: 1, query: "", category: "all" };
+const AUDIT_ENDPOINTS = [
+  "https://newsroom.clisonix.com/audit?limit=200",
+  "https://api.clisonix.com/newsroom/audit?limit=200",
+  "http://localhost:9800/audit?limit=200"
+];
+
+function normalizeCategory(rawCategory) {
+  if (!rawCategory) return "technology";
+  const normalized = String(rawCategory).toLowerCase().trim();
+  if (CATEGORY_ICONS[normalized]) return normalized;
+  return "technology";
+}
+
+function toArticle(event) {
+  return {
+    title: event.title || "Untitled",
+    category: normalizeCategory(event.category),
+    timestamp: event.timestamp ? new Date(event.timestamp).toLocaleString() : "",
+    sources: ["Clisonix Newsroom"],
+    url: "https://news.clisonix.com/",
+  };
+}
+
+async function fetchAuditEvents() {
+  for (const endpoint of AUDIT_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, { cache: "no-store" });
+      if (!res.ok) continue;
+
+      const payload = await res.json();
+      const recent = Array.isArray(payload?.recent) ? payload.recent : [];
+      if (!recent.length) continue;
+
+      return recent
+        .filter((event) => event.platform === "blog" && event.status === "success")
+        .map(toArticle);
+    } catch (_) {
+      // Try next endpoint
+    }
+  }
+  return [];
+}
+
+async function loadArticles() {
+  document.getElementById("statsLine").textContent = "Loading articles...";
+  const events = await fetchAuditEvents();
+
+  allArticles.length = 0;
+  allArticles.push(...events);
+
+  if (!allArticles.length) {
+    document.getElementById("statsLine").textContent = "No live feed yet. Waiting for newsroom publications...";
+  }
+
+  render();
+}
 
 function initializeFilters() {
   const tabs = document.getElementById("filterTabs");
@@ -227,8 +291,7 @@ function render() {
 
 // Initialize
 initializeFilters();
-document.getElementById("statsLine").textContent = "Ready for articles...";
-render();
+loadArticles();
 </script>
 
 </body>
