@@ -1,0 +1,35 @@
+title: Clisonix News
+subtitle: Global AI News Platform
+description: >-
+  Independent, AI-powered news with extreme ethics and institutional standards.
+  Global insights on tech, economy, health, innovation, and society.
+url: "https://news.clisonix.com"
+baseurl: ""
+author:
+  name: Clisonix News Team
+  email: news@clisonix.com
+lang: en
+timezone: UTC
+
+# Build settings
+theme: minimal
+markdown: kramdown
+plugins:
+  - jekyll-feed
+
+# Collections
+collections:
+  posts:
+    output: true
+    permalink: /:year/:month/:day/:slug.html
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+# Output
+incremental: true

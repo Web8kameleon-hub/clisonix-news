@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clisonix News – Global AI-Powered News Platform</title>
+  <meta name="description" content="Independent, AI-powered news with extreme ethics and institutional standards. Global insights on tech, economy, health, innovation, and society.">
+  <meta name="og:title" content="Clisonix News">
+  <meta name="og:description" content="Global AI News Platform – Tech, Economy, Health, Innovation">
+  <meta name="og:image" content="https://news.clisonix.com/static/og-image.png">
+  <link rel="canonical" href="https://news.clisonix.com/">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+    header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 2px solid #3b82f6; padding: 2rem 1.5rem; text-align: center; }
+    header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    header p { color: #94a3b8; font-size: 1rem; margin-bottom: 1rem; }
+    .tagline { color: #64748b; font-size: 0.85rem; }
+    .search-bar { max-width: 600px; margin: 1.5rem auto 0; display: flex; gap: 0.5rem; }
+    .search-bar input { flex: 1; padding: 0.8rem 1.2rem; border: 1px solid #334155; border-radius: 8px; background: #1e293b; color: #e2e8f0; font-size: 0.95rem; }
+    .search-bar input::placeholder { color: #64748b; }
+    main { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center; }
+    .filter-tabs button { padding: 0.6rem 1.2rem; border: 1px solid #334155; background: transparent; color: #e2e8f0; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .filter-tabs button:hover { border-color: #3b82f6; color: #3b82f6; }
+    .filter-tabs button.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+    .stats { color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem; text-align: center; }
+    .article-grid { display: grid; gap: 1rem; }
+    .article-card { background: #1e293b; border-radius: 12px; padding: 1.3rem; border: 1px solid #334155; transition: all 0.3s; }
+    .article-card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15); }
+    .article-header { display: flex; align-items: start; gap: 0.8rem; margin-bottom: 0.8rem; }
+    .article-icon { font-size: 1.8rem; }
+    .article-title { color: #e2e8f0; font-size: 1.1rem; font-weight: 600; line-height: 1.4; }
+    .article-title a { color: #e2e8f0; text-decoration: none; }
+    .article-title a:hover { color: #3b82f6; }
+    .article-meta { color: #64748b; font-size: 0.8rem; margin-top: 0.6rem; }
+    .article-category { display: inline-block; padding: 0.3rem 0.6rem; background: #334155; border-radius: 4px; font-size: 0.75rem; color: #94a3b8; margin-right: 0.5rem; }
+    .pagination { display: flex; justify-content: center; gap: 0.5rem; margin: 2rem 0; flex-wrap: wrap; }
+    .pagination button { padding: 0.5rem 0.9rem; border: 1px solid #334155; background: transparent; color: #e2e8f0; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .pagination button:hover { background: #334155; }
+    .pagination button.active { background: #3b82f6; border-color: #3b82f6; color: white; }
+    #no-results { display: none; text-align: center; color: #64748b; padding: 3rem 1rem; }
+    footer { text-align: center; color: #64748b; font-size: 0.85rem; padding: 2rem; border-top: 1px solid #334155; margin-top: 3rem; }
+  </style>
+</head>
+<body>
+
+<script>
+  (function(){
+    var p = window.location.pathname;
+    if(p.indexOf('/clisonix-news/clisonix-news/') !== -1){
+      window.location.replace(p.replace('/clisonix-news/clisonix-news/','https://news.clisonix.com/'));
+    }
+  })();
+</script>
+
+<header>
+  <h1>Clisonix News</h1>
+  <p class="tagline">Global AI-Powered News Platform</p>
+  <p>Independent, verified, ethical journalism. Technology • Economy • Health • Innovation • Society</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search news..." oninput="onSearch()">
+  </div>
+</header>
+
+<main>
+  <div class="filter-tabs" id="filterTabs"></div>
+  <p class="stats" id="statsLine">Loading articles...</p>
+  <div id="articleList"></div>
+  <p id="no-results">No articles found. Try adjusting your search or filters.</p>
+  <div class="pagination" id="pagination"></div>
+</main>
+
+<footer>
+  <p>© 2026 Clisonix News. Committed to accuracy, neutrality, and transparency.</p>
+  <p>All content verified against institutional sources. <a href="https://clisonix.com/" style="color: #3b82f6; text-decoration: none;">Learn more</a></p>
+</footer>
+
+<script>
+const CATEGORY_ICONS = {
+  "politics": "🏛",
+  "economy": "📈",
+  "technology": "💻",
+  "health": "🏥",
+  "sports": "⚽",
+  "crisis": "🚨",
+  "environment": "🌍",
+  "education": "🎓",
+  "business": "💼",
+  "innovation": "🚀"
+};
+
+const allArticles = [];
+const PAGE_SIZE = 15;
+const state = { page: 1, query: "", category: "all" };
+
+function initializeFilters() {
+  const tabs = document.getElementById("filterTabs");
+  tabs.innerHTML = '';
+  
+  const btn = document.createElement("button");
+  btn.textContent = "All";
+  btn.className = "active";
+  btn.onclick = () => { state.category = "all"; state.page = 1; render(); updateFilterButtons(); };
+  tabs.appendChild(btn);
+  
+  Object.keys(CATEGORY_ICONS).forEach(cat => {
+    const btn = document.createElement("button");
+    btn.textContent = CATEGORY_ICONS[cat] + " " + cat.charAt(0).toUpperCase() + cat.slice(1);
+    btn.onclick = () => { state.category = cat; state.page = 1; render(); updateFilterButtons(); };
+    tabs.appendChild(btn);
+  });
+}
+
+function updateFilterButtons() {
+  const buttons = document.querySelectorAll(".filter-tabs button");
+  buttons.forEach(btn => { btn.classList.remove("active"); });
+  if (state.category === "all") {
+    buttons[0].classList.add("active");
+  } else {
+    buttons.forEach((btn, idx) => {
+      if (btn.textContent.toLowerCase().includes(state.category)) {
+        btn.classList.add("active");
+      }
+    });
+  }
+}
+
+function onSearch() {
+  state.query = document.getElementById("searchInput").value.toLowerCase();
+  state.page = 1;
+  render();
+}
+
+function filtered() {
+  let items = allArticles;
+  
+  if (state.category !== "all") {
+    items = items.filter(a => a.category.toLowerCase() === state.category);
+  }
+  
+  if (state.query) {
+    items = items.filter(a => 
+      a.title.toLowerCase().includes(state.query) || 
+      a.category.toLowerCase().includes(state.query) ||
+      a.timestamp.includes(state.query)
+    );
+  }
+  
+  return items;
+}
+
+function render() {
+  const items = filtered();
+  const total = items.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const start = (state.page - 1) * PAGE_SIZE;
+  const slice = items.slice(start, start + PAGE_SIZE);
+
+  document.getElementById("statsLine").textContent = total + " article" + (total !== 1 ? "s" : "");
+  
+  const list = document.getElementById("articleList");
+  list.innerHTML = "";
+  
+  slice.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "article-card";
+    
+    const header = document.createElement("div");
+    header.className = "article-header";
+    
+    const icon = document.createElement("span");
+    icon.className = "article-icon";
+    icon.textContent = CATEGORY_ICONS[a.category.toLowerCase()] || "📰";
+    
+    const titleDiv = document.createElement("div");
+    const link = document.createElement("a");
+    link.href = a.url || "#";
+    link.className = "article-title";
+    link.textContent = a.title;
+    
+    const category = document.createElement("span");
+    category.className = "article-category";
+    category.textContent = a.category.charAt(0).toUpperCase() + a.category.slice(1);
+    
+    const meta = document.createElement("div");
+    meta.className = "article-meta";
+    meta.textContent = a.timestamp + " • " + (a.sources ? a.sources.join(", ") : "Clisonix News");
+    
+    titleDiv.appendChild(link);
+    titleDiv.appendChild(category);
+    titleDiv.appendChild(meta);
+    header.appendChild(icon);
+    header.appendChild(titleDiv);
+    card.appendChild(header);
+    
+    list.appendChild(card);
+  });
+  
+  document.getElementById("no-results").style.display = slice.length ? "none" : "block";
+
+  const pag = document.getElementById("pagination");
+  pag.innerHTML = "";
+  if (pages <= 1) return;
+  
+  const makeBtn = (label, page, active) => {
+    const b = document.createElement("button");
+    b.textContent = label;
+    if (active) b.className = "active";
+    b.onclick = () => { state.page = page; render(); window.scrollTo(0, 0); };
+    return b;
+  };
+  
+  if (state.page > 1) pag.appendChild(makeBtn("← Prev", state.page - 1, false));
+  
+  const range = 3;
+  for (let i = Math.max(1, state.page - range); i <= Math.min(pages, state.page + range); i++) {
+    pag.appendChild(makeBtn(i, i, i === state.page));
+  }
+  
+  if (state.page < pages) pag.appendChild(makeBtn("Next →", state.page + 1, false));
+}
+
+// Initialize
+initializeFilters();
+document.getElementById("statsLine").textContent = "Ready for articles...";
+render();
+</script>
+
+</body>
+</html>

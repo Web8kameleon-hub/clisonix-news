@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://euroweb.com/sitemap.xml
-
-# EuroWeb Ultra Platform
-# Created by Ledjan Ahmati (100% Owner)
-# Contact: dealsjona@gmail.com
