@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # EuroWeb Platform v9.0.1 - Main Application
+  euroweb-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"  # Updated to standard Next.js port
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - AGI_MODE=active
+      - AVIATION_MODE=enabled
+      - UTT_BLOCKCHAIN=enabled
+      - OFFICE_SUITE=enabled
+    volumes:
+      - ./public:/app/public:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - euroweb-network
+
+  euroweb-backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile
+      target: backend
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - AGI_CORE=enabled
+    restart: unless-stopped
+    networks:
+      - euroweb-network
+
+networks:
+  euroweb-network:
+    driver: bridge
+
+volumes:
+  euroweb-data:
+    driver: local
