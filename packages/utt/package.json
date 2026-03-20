@@ -1,0 +1,13 @@
+{
+  "name": "@euroweb/utt",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.ts",
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.95.3",
+    "eslint": "10.0.1",
+    "next": "^16.1.6"
+  }
+}

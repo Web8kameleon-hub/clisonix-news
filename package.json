@@ -1,0 +1,32 @@
+{
+  "name": "euroweb",
+  "private": true,
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:dashboard": "turbo run dev --filter=dashboard",
+    "dev:console": "turbo run dev --filter=console"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.1",
+    "prettier": "^3.3.3",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.4",
+    "zod": "^3.23.8"
+  },
+  "dependencies": {
+    "next": "^16.1.6",
+    "react-hot-toast": "^2.6.0",
+    "rxjs": "^7.8.2",
+    "styles": "^0.2.1",
+    "ws": "^8.19.0"
+  }
+}

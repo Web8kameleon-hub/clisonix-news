@@ -1,0 +1,35 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "preserve",
+    "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/station-config": ["./lib/config/station-location-config"],
+      "@/mesh-network": ["./lib/mesh/mesh-networking"],
+      "@euroweb/utt/*": ["../../packages/utt/*"],
+      "@euroweb/agi/*": ["../../packages/agi/src/*"],
+      "@euroweb/ui/*": ["../../packages/ui/src/*"],
+      "@euroweb/utils/*": ["../../packages/utils/src/*"]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./**/*.d.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
