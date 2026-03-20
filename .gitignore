@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Build
+dist/
+build/
+.next/
+out/
+.cache/
+*.log
+
+# System
+.DS_Store
+.env
+.env.local
+
+# Test
+coverage/
+.vscode/
+.idea/
+
+# Other
+*.swp
+*.swo
