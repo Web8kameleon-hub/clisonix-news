@@ -1,0 +1,8 @@
+'use client'
+
+import OpenMindChat from '../../frontend/components/OpenMindChat'
+
+export default function OpenMindPage() {
+  return <OpenMindChat />
+}
+
